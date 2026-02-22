@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.venv/
+backend/.venv/
+backend/test_app.db
+backend/coaching.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Local env
+backend/.env
+frontend/.env
+
+# Generated helper output
+FULL_PROJECT_CODE.md
+
+# Storage uploads
+backend/storage/notes/*
+backend/storage/receipts/*
+!backend/storage/notes/.gitkeep
+!backend/storage/receipts/.gitkeep

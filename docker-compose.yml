@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: cms_backend
+    working_dir: /app
+    command: sh -c "alembic upgrade head && python seed.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage:/app/storage
+      - ./backend/coaching.db:/app/coaching.db
+    environment:
+      - DATABASE_URL=sqlite:///./coaching.db
+      - SECRET_KEY=change-me-in-docker
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cms_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
