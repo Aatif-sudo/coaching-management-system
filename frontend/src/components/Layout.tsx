@@ -43,60 +43,41 @@ export function Layout() {
         <Container maxWidth="xl">
           <Toolbar sx={{ px: "0 !important", py: 1, minHeight: "auto" }}>
             <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ width: "100%" }}>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Coaching Management System
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Operations console for coaching institutes
-              </Typography>
-            </Box>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Paper variant="outlined" sx={{ px: 1.5, py: 1 }}>
-                <Typography variant="caption" sx={{ display: "block", fontWeight: 700 }}>
-                  {user?.full_name}
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  Coaching Management System
                 </Typography>
-                <Typography variant="caption">{user?.role}</Typography>
-              </Paper>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={toggleMode}
-                startIcon={mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
-              >
-                {mode === "dark" ? "Light" : "Dark"}
-              </Button>
-              <Button variant="contained" size="small" onClick={logout} endIcon={<LogoutIcon />}>
-                Logout
-              </Button>
+                <Typography variant="caption" color="text.secondary">
+                  Operations console for coaching institutes
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Paper variant="outlined" sx={{ px: 1.5, py: 1 }}>
+                  <Typography variant="caption" sx={{ display: "block", fontWeight: 700 }}>
+                    {user?.full_name}
+                  </Typography>
+                  <Typography variant="caption">{user?.role}</Typography>
+                </Paper>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={toggleMode}
+                  startIcon={mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+                >
+                  {mode === "dark" ? "Light" : "Dark"}
+                </Button>
+                <Button variant="contained" size="small" onClick={logout} endIcon={<LogoutIcon />}>
+                  Logout
+                </Button>
+              </Stack>
             </Stack>
-          </Stack>
           </Toolbar>
         </Container>
       </AppBar>
 
       <Container maxWidth="xl" sx={{ py: 3 }}>
-        <Box
-          sx={{
-            position: "relative",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: { xs: "-10px", md: "-20px" },
-              borderRadius: 4,
-              background:
-                mode === "dark"
-                  ? "linear-gradient(135deg, rgba(56,189,248,0.14), rgba(15,23,42,0.1) 40%, rgba(6,182,212,0.08) 100%)"
-                  : "linear-gradient(135deg, rgba(255,255,255,0.58), rgba(226,242,255,0.3) 50%, rgba(241,245,249,0.18) 100%)",
-              border: "1px solid",
-              borderColor: mode === "dark" ? "rgba(147,180,217,0.25)" : "rgba(15,23,42,0.08)",
-              backdropFilter: "blur(10px)",
-              zIndex: 0,
-              pointerEvents: "none",
-            },
-          }}
-        >
-        <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "220px 1fr" } }}>
+
+        <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", lg: "220px 1fr" } }}>
           <Paper sx={{ p: 1.5, position: "relative", zIndex: 1 }}>
             <Stack spacing={0.5}>
               {navItems.map((item) => (
@@ -121,7 +102,6 @@ export function Layout() {
           <Paper sx={{ p: { xs: 2, sm: 3 }, position: "relative", zIndex: 1 }}>
             <Outlet />
           </Paper>
-        </Box>
         </Box>
       </Container>
     </Box>
