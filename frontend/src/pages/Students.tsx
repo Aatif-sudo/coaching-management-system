@@ -1,10 +1,30 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import { api } from "../api";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { Batch, Student } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { Batch, Student } from "../types";
 
 const initialForm = {
   full_name: "",
@@ -57,14 +77,15 @@ export function StudentsPage() {
     void load();
   }, [page, search]);
 
-  const onBatchSelect = (event: ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(event.target.selectedOptions).map((opt) => Number(opt.value));
-    setForm((prev) => ({ ...prev, batch_ids: selected }));
-  };
-
   const resetForm = () => {
     setForm(initialForm);
     setEditing(null);
+  };
+
+  const onBatchSelect = (event: SelectChangeEvent<number[]>) => {
+    const value = event.target.value;
+    const batchIds = (typeof value === "string" ? value.split(",") : value).map(Number);
+    setForm((prev) => ({ ...prev, batch_ids: batchIds }));
   };
 
   const submit = async (event: FormEvent) => {
@@ -121,9 +142,7 @@ export function StudentsPage() {
   };
 
   const disableStudent = async () => {
-    if (!confirmDisableId) {
-      return;
-    }
+    if (!confirmDisableId) return;
     try {
       await api.disableStudent(confirmDisableId);
       pushToast("success", "Student disabled");
@@ -135,173 +154,215 @@ export function StudentsPage() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">{editing ? "Edit Student" : "Add Student"}</h2>
-        <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input
-            placeholder="Full name"
-            value={form.full_name}
-            onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
-            required
-          />
-          <input
-            placeholder="Phone"
-            value={form.phone}
-            onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-          />
-          <input
-            placeholder="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-          />
-          <input
-            placeholder="Guardian name"
-            value={form.guardian_name}
-            onChange={(e) => setForm((prev) => ({ ...prev, guardian_name: e.target.value }))}
-          />
-          <input
-            placeholder="Guardian phone"
-            value={form.guardian_phone}
-            onChange={(e) => setForm((prev) => ({ ...prev, guardian_phone: e.target.value }))}
-          />
-          <input
-            placeholder="Join date"
-            type="date"
-            value={form.join_date}
-            onChange={(e) => setForm((prev) => ({ ...prev, join_date: e.target.value }))}
-            required
-          />
-          <select
-            value={form.status}
-            onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
-          >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="DISABLED">DISABLED</option>
-          </select>
-          <select multiple value={form.batch_ids.map(String)} onChange={onBatchSelect}>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
-              </option>
-            ))}
-          </select>
-          <textarea
-            className="sm:col-span-2"
-            placeholder="Address"
-            value={form.address}
-            onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
-            rows={2}
-          />
-          <div className="sm:col-span-2 flex gap-3">
-            <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? "Saving..." : editing ? "Update Student" : "Create Student"}
-            </button>
-            {editing ? (
-              <button type="button" className="btn-secondary" onClick={resetForm}>
-                Cancel Edit
-              </button>
-            ) : null}
-          </div>
-        </form>
-      </section>
+    <Stack spacing={3}>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h5">{editing ? "Edit Student" : "Add Student"}</Typography>
+        <Box component="form" onSubmit={submit} sx={{ mt: 2 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+            <Box>
+              <TextField
+                label="Full Name"
+                value={form.full_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
+                required
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <TextField
+                label="Phone"
+                value={form.phone}
+                onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <TextField
+                label="Email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <TextField
+                label="Guardian Name"
+                value={form.guardian_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, guardian_name: e.target.value }))}
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <TextField
+                label="Guardian Phone"
+                value={form.guardian_phone}
+                onChange={(e) => setForm((prev) => ({ ...prev, guardian_phone: e.target.value }))}
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <TextField
+                label="Join Date"
+                type="date"
+                value={form.join_date}
+                onChange={(e) => setForm((prev) => ({ ...prev, join_date: e.target.value }))}
+                InputLabelProps={{ shrink: true }}
+                required
+                fullWidth
+              />
+            </Box>
+            <Box>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  label="Status"
+                  value={form.status}
+                  onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
+                >
+                  <MenuItem value="ACTIVE">ACTIVE</MenuItem>
+                  <MenuItem value="DISABLED">DISABLED</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <FormControl fullWidth>
+                <InputLabel>Batches</InputLabel>
+                <Select
+                  multiple
+                  label="Batches"
+                  value={form.batch_ids}
+                  onChange={onBatchSelect}
+                  renderValue={(selected) => `${selected.length} selected`}
+                >
+                  {batches.map((batch) => (
+                    <MenuItem key={batch.id} value={batch.id}>
+                      {batch.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}>
+              <TextField
+                label="Address"
+                value={form.address}
+                onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
+                multiline
+                rows={2}
+                fullWidth
+              />
+            </Box>
+            <Box sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}>
+              <Stack direction="row" spacing={1.5}>
+                <Button type="submit" variant="contained" disabled={submitting}>
+                  {submitting ? "Saving..." : editing ? "Update Student" : "Create Student"}
+                </Button>
+                {editing ? (
+                  <Button type="button" variant="outlined" onClick={resetForm}>
+                    Cancel Edit
+                  </Button>
+                ) : null}
+              </Stack>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
 
-      <section className="card space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl text-charcoal">Students</h2>
-          <input
-            className="w-full sm:w-72"
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+          <Typography variant="h5">Students</Typography>
+          <TextField
             placeholder="Search by name"
             value={search}
             onChange={(e) => {
               setPage(1);
               setSearch(e.target.value);
             }}
+            size="small"
+            sx={{ minWidth: { xs: "100%", sm: 280 } }}
           />
-        </div>
+        </Stack>
 
         {!students.length ? (
           <EmptyState title="No students found" subtitle="Try adding students or changing filters." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-charcoal/70">
-                <tr>
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Phone</th>
-                  <th className="py-2">Email</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Batches</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Phone</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Batches</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {students.map((student) => (
-                  <tr key={student.id} className="border-t border-sand/70">
-                    <td className="py-2 font-semibold">{student.full_name}</td>
-                    <td className="py-2">{student.phone || "-"}</td>
-                    <td className="py-2">{student.email || "-"}</td>
-                    <td className="py-2">
-                      <span
-                        className={`rounded px-2 py-1 text-xs font-semibold ${
-                          student.status === "ACTIVE" ? "bg-emerald-100 text-emerald-900" : "bg-red-100 text-red-900"
-                        }`}
-                      >
-                        {student.status}
-                      </span>
-                    </td>
-                    <td className="py-2">{student.batch_ids.length}</td>
-                    <td className="py-2">
-                      <div className="flex justify-end gap-2">
-                        <button className="btn-secondary px-3 py-1" onClick={() => startEdit(student)} type="button">
+                  <TableRow key={student.id}>
+                    <TableCell sx={{ fontWeight: 700 }}>{student.full_name}</TableCell>
+                    <TableCell>{student.phone || "-"}</TableCell>
+                    <TableCell>{student.email || "-"}</TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        label={student.status}
+                        color={student.status === "ACTIVE" ? "success" : "error"}
+                        variant={student.status === "ACTIVE" ? "filled" : "outlined"}
+                      />
+                    </TableCell>
+                    <TableCell>{student.batch_ids.length}</TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Button size="small" variant="outlined" onClick={() => startEdit(student)}>
                           Edit
-                        </button>
-                        <button
-                          className="rounded-lg bg-red-600 px-3 py-1 text-xs font-semibold text-white"
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="error"
                           onClick={() => setConfirmDisableId(student.id)}
-                          type="button"
                         >
                           Disable
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
 
-        <div className="flex items-center justify-between text-sm">
-          <p>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+          <Typography variant="body2">
             Page {page} / {totalPages} ({total} students)
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="btn-secondary"
-              type="button"
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              size="small"
               disabled={page <= 1}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             >
               Prev
-            </button>
-            <button
-              className="btn-secondary"
-              type="button"
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
               disabled={page >= totalPages}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
             >
               Next
-            </button>
-          </div>
-        </div>
-      </section>
+            </Button>
+          </Stack>
+        </Stack>
+      </Paper>
 
       <ConfirmDialog
         open={Boolean(confirmDisableId)}
@@ -310,6 +371,6 @@ export function StudentsPage() {
         onCancel={() => setConfirmDisableId(null)}
         onConfirm={disableStudent}
       />
-    </div>
+    </Stack>
   );
 }

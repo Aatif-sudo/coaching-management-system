@@ -1,3 +1,5 @@
+import { Paper, Typography } from "@mui/material";
+
 export function EmptyState({
   title,
   subtitle,
@@ -6,10 +8,23 @@ export function EmptyState({
   subtitle?: string;
 }) {
   return (
-    <div className="rounded-xl border border-sand bg-mist px-6 py-10 text-center">
-      <p className="font-display text-lg text-charcoal">{title}</p>
-      {subtitle ? <p className="mt-1 text-sm text-charcoal/70">{subtitle}</p> : null}
-    </div>
+    <Paper
+      variant="outlined"
+      sx={{
+        px: 3,
+        py: 5,
+        textAlign: "center",
+        borderColor: "#e8ddcc",
+        bgcolor: "#f0ece4",
+      }}
+    >
+      <Typography variant="h6">{title}</Typography>
+      {subtitle ? (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          {subtitle}
+        </Typography>
+      ) : null}
+    </Paper>
   );
 }
 

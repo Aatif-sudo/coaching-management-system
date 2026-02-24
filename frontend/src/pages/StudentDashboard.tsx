@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Box,
+  Button,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { api } from "../api";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { NotificationItem } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { NotificationItem } from "../types";
 
 export function StudentDashboardPage() {
   const { pushToast } = useToast();
@@ -83,12 +90,8 @@ export function StudentDashboardPage() {
     [notifications],
   );
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-  if (!dashboard) {
-    return <EmptyState title="No student data available" />;
-  }
+  if (loading) return <LoadingSpinner />;
+  if (!dashboard) return <EmptyState title="No student data available" />;
 
   const batches = (dashboard.batches as Array<Record<string, unknown>>) || [];
   const attendance = (dashboard.attendance as Array<Record<string, unknown>>) || [];
@@ -96,172 +99,209 @@ export function StudentDashboardPage() {
   const fees = (dashboard.fees as Array<Record<string, unknown>>) || [];
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 sm:grid-cols-3">
-        <div className="card bg-gradient-to-b from-white to-mist">
-          <p className="text-xs uppercase tracking-wide text-charcoal/70">Total Due</p>
-          <p className="mt-2 font-display text-2xl text-charcoal">INR {String(dashboard.total_due_amount)}</p>
-        </div>
-        <div className="card bg-gradient-to-b from-white to-mist">
-          <p className="text-xs uppercase tracking-wide text-charcoal/70">Batches</p>
-          <p className="mt-2 font-display text-2xl text-charcoal">{batches.length}</p>
-        </div>
-        <div className="card bg-gradient-to-b from-white to-mist">
-          <p className="text-xs uppercase tracking-wide text-charcoal/70">Unread Alerts</p>
-          <p className="mt-2 font-display text-2xl text-charcoal">{unreadCount}</p>
-        </div>
-      </section>
+    <Stack spacing={3}>
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" } }}>
+        <Paper variant="outlined" sx={{ p: 2, borderColor: "#e8ddcc", background: "linear-gradient(180deg, #fff 0%, #f0ece4 100%)" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase" }}>
+            Total Due
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 0.75 }}>
+            INR {String(dashboard.total_due_amount)}
+          </Typography>
+        </Paper>
+        <Paper variant="outlined" sx={{ p: 2, borderColor: "#e8ddcc", background: "linear-gradient(180deg, #fff 0%, #f0ece4 100%)" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase" }}>
+            Batches
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 0.75 }}>
+            {batches.length}
+          </Typography>
+        </Paper>
+        <Paper variant="outlined" sx={{ p: 2, borderColor: "#e8ddcc", background: "linear-gradient(180deg, #fff 0%, #f0ece4 100%)" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase" }}>
+            Unread Alerts
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 0.75 }}>
+            {unreadCount}
+          </Typography>
+        </Paper>
+      </Box>
 
-      <section className="grid gap-5 lg:grid-cols-2">
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Batch Details</h2>
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" } }}>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Batch Details</Typography>
           {!batches.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No active batches" />
-            </div>
+            </Box>
           ) : (
-            <ul className="mt-3 space-y-2 text-sm">
+            <Stack spacing={1} sx={{ mt: 1.5 }}>
               {batches.map((batch) => (
-                <li key={String(batch.id)} className="rounded-lg border border-sand p-3">
-                  <p className="font-semibold">{String(batch.name)}</p>
-                  <p>{String(batch.course)}</p>
-                  <p className="text-xs text-charcoal/70">{String(batch.schedule)}</p>
-                  <p className="text-xs text-charcoal/70">Teacher: {String(batch.teacher_name || "-")}</p>
-                </li>
+                <Paper key={String(batch.id)} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {String(batch.name)}
+                  </Typography>
+                  <Typography variant="body2">{String(batch.course)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                    {String(batch.schedule)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Teacher: {String(batch.teacher_name || "-")}
+                  </Typography>
+                </Paper>
               ))}
-            </ul>
+            </Stack>
           )}
-        </div>
+        </Paper>
 
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Attendance %</h2>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Attendance %</Typography>
           {!attendance.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No attendance data yet" />
-            </div>
+            </Box>
           ) : (
-            <ul className="mt-3 space-y-2 text-sm">
+            <Stack spacing={1} sx={{ mt: 1.5 }}>
               {attendance.map((item, index) => (
-                <li key={index} className="rounded-lg border border-sand p-3">
-                  <p>Batch #{String(item.batch_id)}</p>
-                  <p>
+                <Paper key={index} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                  <Typography variant="body2">Batch #{String(item.batch_id)}</Typography>
+                  <Typography variant="body2">
                     Present {String(item.present)} / {String(item.total_classes)}
-                  </p>
-                  <p className="font-semibold text-bronze">{String(item.percentage)}%</p>
-                </li>
+                  </Typography>
+                  <Typography variant="body2" color="primary" sx={{ fontWeight: 700 }}>
+                    {String(item.percentage)}%
+                  </Typography>
+                </Paper>
               ))}
-            </ul>
+            </Stack>
           )}
-        </div>
-      </section>
+        </Paper>
+      </Box>
 
-      <section className="grid gap-5 lg:grid-cols-2">
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Notes</h2>
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" } }}>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Notes</Typography>
           {!notes.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No notes shared yet" />
-            </div>
+            </Box>
           ) : (
-            <ul className="mt-3 space-y-2 text-sm">
+            <Stack spacing={1} sx={{ mt: 1.5 }}>
               {notes.map((note) => (
-                <li key={String(note.id)} className="rounded-lg border border-sand p-3">
-                  <p className="font-semibold">{String(note.title)}</p>
-                  <p className="text-charcoal/70">{String(note.description || "-")}</p>
-                  <button
+                <Paper key={String(note.id)} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {String(note.title)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {String(note.description || "-")}
+                  </Typography>
+                  <Button
                     type="button"
-                    className="btn-secondary mt-2"
+                    variant="outlined"
+                    sx={{ mt: 1 }}
                     onClick={() => void downloadNote(Number(note.id), String(note.file_name))}
                   >
                     Download {String(note.file_name)}
-                  </button>
-                </li>
+                  </Button>
+                </Paper>
               ))}
-            </ul>
+            </Stack>
           )}
-        </div>
+        </Paper>
 
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Fees & Payments</h2>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Fees & Payments</Typography>
           {!fees.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No fee records yet" />
-            </div>
+            </Box>
           ) : (
-            <div className="mt-3 space-y-3 text-sm">
+            <Stack spacing={1.5} sx={{ mt: 1.5 }}>
               {fees.map((fee) => {
                 const paymentRows = (fee.payments as Array<Record<string, unknown>>) || [];
                 return (
-                  <div key={String(fee.student_fee_id)} className="rounded-lg border border-sand p-3">
-                    <p className="font-semibold">{String(fee.batch_name)}</p>
-                    <p>
+                  <Paper key={String(fee.student_fee_id)} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {String(fee.batch_name)}
+                    </Typography>
+                    <Typography variant="body2">
                       Total: {String(fee.total_fee)} | Paid: {String(fee.paid_amount)} | Due: {String(fee.due_amount)}
-                    </p>
-                    <div className="mt-2 space-y-1">
+                    </Typography>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
                       {paymentRows.map((payment) => (
-                        <div key={String(payment.id)} className="rounded-md border border-sand/80 p-2">
-                          <p>
+                        <Paper key={String(payment.id)} variant="outlined" sx={{ p: 1, borderColor: "#e8ddcc" }}>
+                          <Typography variant="body2">
                             {String(payment.date)} | {String(payment.amount)} | {String(payment.mode)}
-                          </p>
-                          <button
-                            className="btn-secondary mt-1"
+                          </Typography>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{ mt: 0.5 }}
                             type="button"
-                            onClick={() =>
-                              void downloadReceipt(Number(payment.id), String(payment.receipt_no))
-                            }
+                            onClick={() => void downloadReceipt(Number(payment.id), String(payment.receipt_no))}
                           >
                             Receipt {String(payment.receipt_no)}
-                          </button>
-                        </div>
+                          </Button>
+                        </Paper>
                       ))}
-                    </div>
-                  </div>
+                    </Stack>
+                  </Paper>
                 );
               })}
-            </div>
+            </Stack>
           )}
-        </div>
-      </section>
+        </Paper>
+      </Box>
 
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">Notifications</h2>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h6">Notifications</Typography>
         {!notifications.length ? (
-          <div className="mt-3">
+          <Box sx={{ mt: 1.5 }}>
             <EmptyState title="No notifications yet" />
-          </div>
+          </Box>
         ) : (
-          <ul className="mt-3 space-y-2 text-sm">
+          <Stack spacing={1} sx={{ mt: 1.5 }}>
             {notifications.map((notification) => (
-              <li
+              <Paper
                 key={notification.id}
-                className={`rounded-lg border p-3 ${
-                  notification.read_at ? "border-sand/70 bg-white" : "border-bronze/40 bg-amber-50"
-                }`}
+                variant="outlined"
+                sx={{
+                  p: 1.5,
+                  borderColor: notification.read_at ? "#e8ddcc" : "rgba(157, 107, 59, 0.4)",
+                  bgcolor: notification.read_at ? "white" : "#fff8e1",
+                }}
               >
-                <p className="text-xs uppercase text-charcoal/60">{notification.type}</p>
-                <p className="font-semibold">{notification.message}</p>
-                <p className="text-xs text-charcoal/60">{notification.created_at}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase" }}>
+                  {notification.type}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  {notification.message}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {notification.created_at}
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
                   {!notification.read_at ? (
-                    <button className="btn-secondary" onClick={() => void markRead(notification.id)} type="button">
+                    <Button variant="outlined" size="small" onClick={() => void markRead(notification.id)} type="button">
                       Mark as Read
-                    </button>
+                    </Button>
                   ) : null}
                   {notification.type === "FEE_REMINDER" ? (
-                    <button
-                      className="btn-secondary"
+                    <Button
+                      variant="outlined"
+                      size="small"
                       onClick={() => void copyWhatsAppTemplate(notification.id)}
                       type="button"
                     >
                       Copy WhatsApp Text
-                    </button>
+                    </Button>
                   ) : null}
-                </div>
-              </li>
+                </Stack>
+              </Paper>
             ))}
-          </ul>
+          </Stack>
         )}
-      </section>
-    </div>
+      </Paper>
+    </Stack>
   );
 }

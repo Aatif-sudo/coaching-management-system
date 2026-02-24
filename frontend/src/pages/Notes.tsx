@@ -1,9 +1,21 @@
 import { FormEvent, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { api } from "../api";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { Batch, NoteItem } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { Batch, NoteItem } from "../types";
 
 export function NotesPage() {
   const { pushToast } = useToast();
@@ -79,92 +91,124 @@ export function NotesPage() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">Upload Study Material</h2>
-        <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={upload}>
-          <select
-            value={form.batch_id}
-            onChange={(e) => setForm((prev) => ({ ...prev, batch_id: e.target.value }))}
-            required
-          >
-            <option value="">Select batch</option>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
-              </option>
-            ))}
-          </select>
-          <input
+    <Stack spacing={3}>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h5">Upload Study Material</Typography>
+        <Box
+          component="form"
+          onSubmit={upload}
+          sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}
+        >
+          <FormControl fullWidth required>
+            <InputLabel>Batch</InputLabel>
+            <Select
+              label="Batch"
+              value={form.batch_id}
+              onChange={(e) => setForm((prev) => ({ ...prev, batch_id: e.target.value }))}
+            >
+              <MenuItem value="">Select batch</MenuItem>
+              {batches.map((batch) => (
+                <MenuItem key={batch.id} value={batch.id}>
+                  {batch.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Title"
             value={form.title}
             onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-            placeholder="Title"
             required
+            fullWidth
           />
-          <input
+          <TextField
+            label="Tags"
             value={form.tags}
             onChange={(e) => setForm((prev) => ({ ...prev, tags: e.target.value }))}
-            placeholder="Tags (comma separated)"
+            placeholder="comma separated"
+            fullWidth
           />
-          <input
+          <TextField
+            label="Attachment"
             type="file"
-            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt"
-            onChange={(e) => setForm((prev) => ({ ...prev, file: e.target.files?.[0] || null }))}
+            inputProps={{ accept: ".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" }}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, file: (e.target as HTMLInputElement).files?.[0] || null }))
+            }
             required
+            fullWidth
+            InputLabelProps={{ shrink: true }}
           />
-          <textarea
-            className="sm:col-span-2"
-            rows={3}
-            value={form.description}
-            onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-            placeholder="Description"
-          />
-          <button className="btn-primary sm:col-span-2 w-fit" type="submit" disabled={uploading}>
-            {uploading ? "Uploading..." : "Upload Note"}
-          </button>
-        </form>
-      </section>
+          <Box sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}>
+            <TextField
+              label="Description"
+              value={form.description}
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              multiline
+              rows={3}
+              fullWidth
+            />
+          </Box>
+          <Box sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}>
+            <Button type="submit" variant="contained" disabled={uploading}>
+              {uploading ? "Uploading..." : "Upload Note"}
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
 
-      <section className="card space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl text-charcoal">Notes Library</h2>
-          <select value={batchFilter} onChange={(e) => setBatchFilter(e.target.value)} className="w-full sm:w-72">
-            <option value="">All batches</option>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
+          <Typography variant="h5">Notes Library</Typography>
+          <FormControl sx={{ minWidth: { xs: "100%", sm: 280 } }} size="small">
+            <InputLabel>Batch</InputLabel>
+            <Select label="Batch" value={batchFilter} onChange={(e) => setBatchFilter(e.target.value)}>
+              <MenuItem value="">All batches</MenuItem>
+              {batches.map((batch) => (
+                <MenuItem key={batch.id} value={batch.id}>
+                  {batch.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
 
         {!notes.length ? (
-          <EmptyState title="No notes uploaded yet" />
+          <Box sx={{ mt: 1.5 }}>
+            <EmptyState title="No notes uploaded yet" />
+          </Box>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
             {notes.map((note) => (
-              <article key={note.id} className="rounded-lg border border-sand p-4">
-                <p className="text-xs uppercase text-charcoal/60">Batch #{note.batch_id}</p>
-                <h3 className="mt-1 font-semibold text-charcoal">{note.title}</h3>
-                <p className="mt-1 text-sm text-charcoal/75">{note.description || "No description"}</p>
-                <p className="mt-2 text-xs text-charcoal/60">Tags: {note.tags || "-"}</p>
-                <button
+              <Paper key={note.id} variant="outlined" sx={{ p: 2, borderColor: "#e8ddcc" }}>
+                <Typography variant="caption" color="text.secondary">
+                  Batch #{note.batch_id}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  {note.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {note.description || "No description"}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                  Tags: {note.tags || "-"}
+                </Typography>
+                <Button
                   type="button"
-                  className="btn-secondary mt-3"
+                  variant="outlined"
+                  sx={{ mt: 1.25 }}
                   onClick={() => void download(note.id, note.file_name)}
                 >
                   Download {note.file_name}
-                </button>
-              </article>
+                </Button>
+              </Paper>
             ))}
-          </div>
+          </Box>
         )}
-      </section>
-    </div>
+      </Paper>
+    </Stack>
   );
 }

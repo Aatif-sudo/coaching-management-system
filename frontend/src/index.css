@@ -1,34 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    @apply font-body text-charcoal antialiased;
-  }
-
-  input,
-  select,
-  textarea {
-    @apply w-full rounded-lg border border-sand bg-white px-3 py-2 text-sm text-charcoal outline-none transition focus:border-bronze focus:ring-2 focus:ring-bronze/20;
-  }
-
-  button {
-    @apply transition;
-  }
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
 }
-
-@layer components {
-  .card {
-    @apply rounded-xl border border-sand bg-white p-4 shadow-card;
-  }
-
-  .btn-primary {
-    @apply rounded-lg bg-bronze px-4 py-2 text-sm font-semibold text-white hover:brightness-110;
-  }
-
-  .btn-secondary {
-    @apply rounded-lg border border-sand px-4 py-2 text-sm font-semibold text-charcoal hover:bg-mist;
-  }
-}
-

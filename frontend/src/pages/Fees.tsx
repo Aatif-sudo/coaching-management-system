@@ -1,9 +1,27 @@
 import { FormEvent, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { api } from "../api";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { Batch, DueItem, FeePlan, Payment, Student, StudentFee } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { Batch, DueItem, FeePlan, Payment, Student, StudentFee } from "../types";
 
 const planInitial = {
   name: "",
@@ -153,248 +171,280 @@ export function FeesPage() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-5 lg:grid-cols-3">
-        <form className="card space-y-3" onSubmit={createPlan}>
-          <h2 className="font-display text-xl text-charcoal">Fee Plan</h2>
-          <input
-            placeholder="Plan name"
-            value={planForm.name}
-            onChange={(e) => setPlanForm((prev) => ({ ...prev, name: e.target.value }))}
-            required
-          />
-          <select
-            value={planForm.type}
-            onChange={(e) => setPlanForm((prev) => ({ ...prev, type: e.target.value }))}
-          >
-            <option value="MONTHLY">MONTHLY</option>
-            <option value="QUARTERLY">QUARTERLY</option>
-            <option value="ONE_TIME">ONE_TIME</option>
-            <option value="CUSTOM">CUSTOM</option>
-          </select>
-          <input
-            placeholder="Amount"
-            type="number"
-            min={1}
-            value={planForm.amount}
-            onChange={(e) => setPlanForm((prev) => ({ ...prev, amount: e.target.value }))}
-            required
-          />
-          <textarea
-            rows={2}
-            value={planForm.metadata_json}
-            onChange={(e) => setPlanForm((prev) => ({ ...prev, metadata_json: e.target.value }))}
-            placeholder='Optional metadata JSON, e.g. {"months":3}'
-          />
-          <button className="btn-primary" type="submit">
-            Create Plan
-          </button>
-        </form>
+    <Stack spacing={3}>
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr 1fr" } }}>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Fee Plan</Typography>
+          <Stack component="form" onSubmit={createPlan} spacing={1.5} sx={{ mt: 1.5 }}>
+            <TextField
+              label="Plan Name"
+              value={planForm.name}
+              onChange={(e) => setPlanForm((prev) => ({ ...prev, name: e.target.value }))}
+              required
+            />
+            <FormControl fullWidth>
+              <InputLabel>Type</InputLabel>
+              <Select
+                label="Type"
+                value={planForm.type}
+                onChange={(e) => setPlanForm((prev) => ({ ...prev, type: e.target.value }))}
+              >
+                <MenuItem value="MONTHLY">MONTHLY</MenuItem>
+                <MenuItem value="QUARTERLY">QUARTERLY</MenuItem>
+                <MenuItem value="ONE_TIME">ONE_TIME</MenuItem>
+                <MenuItem value="CUSTOM">CUSTOM</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Amount"
+              type="number"
+              inputProps={{ min: 1 }}
+              value={planForm.amount}
+              onChange={(e) => setPlanForm((prev) => ({ ...prev, amount: e.target.value }))}
+              required
+            />
+            <TextField
+              label="Metadata JSON"
+              value={planForm.metadata_json}
+              onChange={(e) => setPlanForm((prev) => ({ ...prev, metadata_json: e.target.value }))}
+              multiline
+              rows={2}
+              placeholder='{"months":3}'
+            />
+            <Button type="submit" variant="contained">
+              Create Plan
+            </Button>
+          </Stack>
+        </Paper>
 
-        <form className="card space-y-3" onSubmit={createStudentFee}>
-          <h2 className="font-display text-xl text-charcoal">Student Fee Mapping</h2>
-          <select
-            value={studentFeeForm.student_id}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, student_id: e.target.value }))}
-            required
-          >
-            <option value="">Select student</option>
-            {students.map((student) => (
-              <option key={student.id} value={student.id}>
-                {student.full_name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={studentFeeForm.batch_id}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, batch_id: e.target.value }))}
-            required
-          >
-            <option value="">Select batch</option>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={studentFeeForm.fee_plan_id}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, fee_plan_id: e.target.value }))}
-          >
-            <option value="">No plan</option>
-            {feePlans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name}
-              </option>
-            ))}
-          </select>
-          <input
-            placeholder="Total fee"
-            type="number"
-            min={1}
-            value={studentFeeForm.total_fee}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, total_fee: e.target.value }))}
-            required
-          />
-          <input
-            placeholder="Discount"
-            type="number"
-            min={0}
-            value={studentFeeForm.discount}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, discount: e.target.value }))}
-          />
-          <textarea
-            rows={4}
-            value={studentFeeForm.due_schedule_text}
-            onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, due_schedule_text: e.target.value }))}
-            placeholder={"Due schedule lines: YYYY-MM-DD,amount\n2026-03-01,3000"}
-            required
-          />
-          <button className="btn-primary" type="submit">
-            Map Fee
-          </button>
-        </form>
-
-        <form className="card space-y-3" onSubmit={createPayment}>
-          <h2 className="font-display text-xl text-charcoal">Record Payment</h2>
-          <select
-            value={paymentForm.student_fee_id}
-            onChange={(e) => setPaymentForm((prev) => ({ ...prev, student_fee_id: e.target.value }))}
-            required
-          >
-            <option value="">Select student fee</option>
-            {studentFees.map((item) => (
-              <option key={item.id} value={item.id}>
-                Fee#{item.id} | Student {item.student_id} | Due {item.due_amount}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min={1}
-            placeholder="Amount paid"
-            value={paymentForm.amount}
-            onChange={(e) => setPaymentForm((prev) => ({ ...prev, amount: e.target.value }))}
-            required
-          />
-          <input
-            type="date"
-            value={paymentForm.paid_on}
-            onChange={(e) => setPaymentForm((prev) => ({ ...prev, paid_on: e.target.value }))}
-            required
-          />
-          <select
-            value={paymentForm.mode}
-            onChange={(e) => setPaymentForm((prev) => ({ ...prev, mode: e.target.value }))}
-          >
-            <option value="CASH">CASH</option>
-            <option value="UPI">UPI</option>
-            <option value="BANK">BANK</option>
-          </select>
-          <textarea
-            rows={2}
-            placeholder="Remarks"
-            value={paymentForm.remarks}
-            onChange={(e) => setPaymentForm((prev) => ({ ...prev, remarks: e.target.value }))}
-          />
-          <button className="btn-primary" type="submit">
-            Save Payment
-          </button>
-        </form>
-      </section>
-
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">Unpaid Dues</h2>
-        {!dues.length ? (
-          <div className="mt-3">
-            <EmptyState title="No pending dues" />
-          </div>
-        ) : (
-          <div className="mt-3 overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-charcoal/70">
-                <tr>
-                  <th className="py-2">Student</th>
-                  <th className="py-2">Batch</th>
-                  <th className="py-2">Due</th>
-                  <th className="py-2">Next Due</th>
-                  <th className="py-2">Upcoming Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dues.map((item) => (
-                  <tr key={item.student_fee_id} className="border-t border-sand/70">
-                    <td className="py-2">{item.student_name}</td>
-                    <td className="py-2">{item.batch_name}</td>
-                    <td className="py-2">{item.due_amount}</td>
-                    <td className="py-2">{item.next_due_date || "-"}</td>
-                    <td className="py-2">{item.upcoming_due_amount || "-"}</td>
-                  </tr>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Student Fee Mapping</Typography>
+          <Stack component="form" onSubmit={createStudentFee} spacing={1.5} sx={{ mt: 1.5 }}>
+            <FormControl fullWidth required>
+              <InputLabel>Student</InputLabel>
+              <Select
+                label="Student"
+                value={studentFeeForm.student_id}
+                onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, student_id: e.target.value }))}
+              >
+                <MenuItem value="">Select student</MenuItem>
+                {students.map((student) => (
+                  <MenuItem key={student.id} value={student.id}>
+                    {student.full_name}
+                  </MenuItem>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth required>
+              <InputLabel>Batch</InputLabel>
+              <Select
+                label="Batch"
+                value={studentFeeForm.batch_id}
+                onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, batch_id: e.target.value }))}
+              >
+                <MenuItem value="">Select batch</MenuItem>
+                {batches.map((batch) => (
+                  <MenuItem key={batch.id} value={batch.id}>
+                    {batch.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Fee Plan</InputLabel>
+              <Select
+                label="Fee Plan"
+                value={studentFeeForm.fee_plan_id}
+                onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, fee_plan_id: e.target.value }))}
+              >
+                <MenuItem value="">No plan</MenuItem>
+                {feePlans.map((plan) => (
+                  <MenuItem key={plan.id} value={plan.id}>
+                    {plan.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Total Fee"
+              type="number"
+              inputProps={{ min: 1 }}
+              value={studentFeeForm.total_fee}
+              onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, total_fee: e.target.value }))}
+              required
+            />
+            <TextField
+              label="Discount"
+              type="number"
+              inputProps={{ min: 0 }}
+              value={studentFeeForm.discount}
+              onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, discount: e.target.value }))}
+            />
+            <TextField
+              label="Due Schedule"
+              value={studentFeeForm.due_schedule_text}
+              onChange={(e) => setStudentFeeForm((prev) => ({ ...prev, due_schedule_text: e.target.value }))}
+              multiline
+              rows={4}
+              placeholder={"YYYY-MM-DD,amount\n2026-03-01,3000"}
+              required
+            />
+            <Button type="submit" variant="contained">
+              Map Fee
+            </Button>
+          </Stack>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Record Payment</Typography>
+          <Stack component="form" onSubmit={createPayment} spacing={1.5} sx={{ mt: 1.5 }}>
+            <FormControl fullWidth required>
+              <InputLabel>Student Fee</InputLabel>
+              <Select
+                label="Student Fee"
+                value={paymentForm.student_fee_id}
+                onChange={(e) => setPaymentForm((prev) => ({ ...prev, student_fee_id: e.target.value }))}
+              >
+                <MenuItem value="">Select student fee</MenuItem>
+                {studentFees.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    Fee#{item.id} | Student {item.student_id} | Due {item.due_amount}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Amount Paid"
+              type="number"
+              inputProps={{ min: 1 }}
+              value={paymentForm.amount}
+              onChange={(e) => setPaymentForm((prev) => ({ ...prev, amount: e.target.value }))}
+              required
+            />
+            <TextField
+              label="Paid On"
+              type="date"
+              value={paymentForm.paid_on}
+              onChange={(e) => setPaymentForm((prev) => ({ ...prev, paid_on: e.target.value }))}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <FormControl fullWidth>
+              <InputLabel>Mode</InputLabel>
+              <Select
+                label="Mode"
+                value={paymentForm.mode}
+                onChange={(e) => setPaymentForm((prev) => ({ ...prev, mode: e.target.value }))}
+              >
+                <MenuItem value="CASH">CASH</MenuItem>
+                <MenuItem value="UPI">UPI</MenuItem>
+                <MenuItem value="BANK">BANK</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Remarks"
+              value={paymentForm.remarks}
+              onChange={(e) => setPaymentForm((prev) => ({ ...prev, remarks: e.target.value }))}
+              multiline
+              rows={2}
+            />
+            <Button type="submit" variant="contained">
+              Save Payment
+            </Button>
+          </Stack>
+        </Paper>
+      </Box>
+
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h6">Unpaid Dues</Typography>
+        {!dues.length ? (
+          <Box sx={{ mt: 1.5 }}>
+            <EmptyState title="No pending dues" />
+          </Box>
+        ) : (
+          <TableContainer sx={{ mt: 1.5 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Student</TableCell>
+                  <TableCell>Batch</TableCell>
+                  <TableCell>Due</TableCell>
+                  <TableCell>Next Due</TableCell>
+                  <TableCell>Upcoming Amount</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {dues.map((item) => (
+                  <TableRow key={item.student_fee_id}>
+                    <TableCell>{item.student_name}</TableCell>
+                    <TableCell>{item.batch_name}</TableCell>
+                    <TableCell>{item.due_amount}</TableCell>
+                    <TableCell>{item.next_due_date || "-"}</TableCell>
+                    <TableCell>{item.upcoming_due_amount || "-"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      </section>
+      </Paper>
 
-      <section className="grid gap-5 lg:grid-cols-2">
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Student Fee Mappings</h2>
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" } }}>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Student Fee Mappings</Typography>
           {!studentFees.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No fee mappings yet" />
-            </div>
+            </Box>
           ) : (
-            <div className="mt-3 space-y-2 text-sm">
+            <Stack spacing={1} sx={{ mt: 1.5 }}>
               {studentFees.map((item) => (
-                <div key={item.id} className="rounded-lg border border-sand p-3">
-                  <p className="font-semibold">
+                <Paper key={item.id} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     Fee#{item.id} | Student {item.student_id} | Batch {item.batch_id}
-                  </p>
-                  <p>
+                  </Typography>
+                  <Typography variant="body2">
                     Total: {item.total_fee} | Paid: {item.paid_amount} | Due: {item.due_amount}
-                  </p>
-                </div>
+                  </Typography>
+                </Paper>
               ))}
-            </div>
+            </Stack>
           )}
-        </div>
+        </Paper>
 
-        <div className="card">
-          <h2 className="font-display text-xl text-charcoal">Payments & Receipts</h2>
+        <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+          <Typography variant="h6">Payments & Receipts</Typography>
           {!payments.length ? (
-            <div className="mt-3">
+            <Box sx={{ mt: 1.5 }}>
               <EmptyState title="No payments yet" />
-            </div>
+            </Box>
           ) : (
-            <div className="mt-3 space-y-2 text-sm">
+            <Stack spacing={1} sx={{ mt: 1.5 }}>
               {payments.map((payment) => (
-                <div key={payment.id} className="rounded-lg border border-sand p-3">
-                  <p className="font-semibold">
+                <Paper key={payment.id} variant="outlined" sx={{ p: 1.5, borderColor: "#e8ddcc" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {payment.receipt_no} | Fee#{payment.student_fee_id}
-                  </p>
-                  <p>
+                  </Typography>
+                  <Typography variant="body2">
                     Amount {payment.amount} on {payment.paid_on} via {payment.mode}
-                  </p>
-                  <button
+                  </Typography>
+                  <Button
                     type="button"
-                    className="btn-secondary mt-2"
+                    variant="outlined"
+                    sx={{ mt: 1 }}
                     onClick={() => void downloadReceipt(payment.id, payment.receipt_no)}
                   >
                     Download Receipt
-                  </button>
-                </div>
+                  </Button>
+                </Paper>
               ))}
-            </div>
+            </Stack>
           )}
-        </div>
-      </section>
-    </div>
+        </Paper>
+      </Box>
+    </Stack>
   );
 }
-

@@ -1,10 +1,5 @@
+import { Alert, Snackbar, Stack } from "@mui/material";
 import { useToast } from "../context/ToastContext";
-
-const COLOR_BY_TYPE: Record<string, string> = {
-  success: "border-emerald-500 bg-emerald-50 text-emerald-900",
-  error: "border-red-500 bg-red-50 text-red-900",
-  info: "border-sky-500 bg-sky-50 text-sky-900",
-};
 
 export function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -12,18 +7,36 @@ export function ToastContainer() {
     return null;
   }
   return (
-    <div className="fixed right-3 top-3 z-50 flex w-[min(92vw,360px)] flex-col gap-2">
+    <Stack
+      spacing={1}
+      sx={{
+        position: "fixed",
+        top: 12,
+        right: 12,
+        zIndex: 1400,
+        width: "min(92vw, 360px)",
+      }}
+    >
       {toasts.map((toast) => (
-        <button
+        <Snackbar
           key={toast.id}
-          type="button"
-          onClick={() => removeToast(toast.id)}
-          className={`rounded-lg border px-4 py-3 text-left text-sm shadow-card ${COLOR_BY_TYPE[toast.type]}`}
+          open
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          onClose={() => removeToast(toast.id)}
+          autoHideDuration={3500}
+          sx={{ position: "static", transform: "none" }}
         >
-          {toast.message}
-        </button>
+          <Alert
+            variant="filled"
+            onClose={() => removeToast(toast.id)}
+            severity={toast.type}
+            sx={{ width: "100%" }}
+          >
+            {toast.message}
+          </Alert>
+        </Snackbar>
       ))}
-    </div>
+    </Stack>
   );
 }
 

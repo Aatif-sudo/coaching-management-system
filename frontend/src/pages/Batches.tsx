@@ -1,10 +1,28 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { api } from "../api";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { AuthUser, Batch, BatchStudent, FeePlan } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { AuthUser, Batch, BatchStudent, FeePlan } from "../types";
 
 const initialForm = {
   name: "",
@@ -111,9 +129,7 @@ export function BatchesPage() {
   };
 
   const deleteBatch = async () => {
-    if (!deleteId) {
-      return;
-    }
+    if (!deleteId) return;
     try {
       await api.deleteBatch(deleteId);
       pushToast("success", "Batch deleted");
@@ -125,189 +141,202 @@ export function BatchesPage() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">{editing ? "Edit Batch" : "Create Batch"}</h2>
-        <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={submit}>
-          <input
-            placeholder="Batch name"
+    <Stack spacing={3}>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h5">{editing ? "Edit Batch" : "Create Batch"}</Typography>
+        <Box component="form" onSubmit={submit} sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+          <TextField
+            label="Batch Name"
             value={form.name}
             onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
             required
+            fullWidth
           />
-          <input
-            placeholder="Course"
+          <TextField
+            label="Course"
             value={form.course}
             onChange={(e) => setForm((prev) => ({ ...prev, course: e.target.value }))}
             required
+            fullWidth
           />
-          <input
-            placeholder="Schedule (days/time)"
+          <TextField
+            label="Schedule (days/time)"
             value={form.schedule}
             onChange={(e) => setForm((prev) => ({ ...prev, schedule: e.target.value }))}
             required
+            fullWidth
           />
-          <select
-            value={form.teacher_id}
-            onChange={(e) => setForm((prev) => ({ ...prev, teacher_id: e.target.value }))}
-          >
-            <option value="">Select teacher</option>
-            {teachers.map((teacher) => (
-              <option key={teacher.id} value={teacher.id}>
-                {teacher.full_name}
-              </option>
-            ))}
-          </select>
-          <input
+          <FormControl fullWidth>
+            <InputLabel>Teacher</InputLabel>
+            <Select
+              label="Teacher"
+              value={form.teacher_id}
+              onChange={(e) => setForm((prev) => ({ ...prev, teacher_id: e.target.value }))}
+            >
+              <MenuItem value="">Select teacher</MenuItem>
+              {teachers.map((teacher) => (
+                <MenuItem key={teacher.id} value={teacher.id}>
+                  {teacher.full_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Start Date"
             type="date"
             value={form.start_date}
             onChange={(e) => setForm((prev) => ({ ...prev, start_date: e.target.value }))}
+            InputLabelProps={{ shrink: true }}
             required
+            fullWidth
           />
-          <input
+          <TextField
+            label="End Date"
             type="date"
             value={form.end_date}
             onChange={(e) => setForm((prev) => ({ ...prev, end_date: e.target.value }))}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
           />
-          <select
-            value={form.fee_plan_id}
-            onChange={(e) => setForm((prev) => ({ ...prev, fee_plan_id: e.target.value }))}
-          >
-            <option value="">No fee plan</option>
-            {feePlans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name}
-              </option>
-            ))}
-          </select>
+          <FormControl fullWidth>
+            <InputLabel>Fee Plan</InputLabel>
+            <Select
+              label="Fee Plan"
+              value={form.fee_plan_id}
+              onChange={(e) => setForm((prev) => ({ ...prev, fee_plan_id: e.target.value }))}
+            >
+              <MenuItem value="">No fee plan</MenuItem>
+              {feePlans.map((plan) => (
+                <MenuItem key={plan.id} value={plan.id}>
+                  {plan.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Box sx={{ gridColumn: { xs: "1", sm: "1 / -1" } }}>
+            <Stack direction="row" spacing={1.5}>
+              <Button variant="contained" type="submit">
+                {editing ? "Update Batch" : "Create Batch"}
+              </Button>
+              {editing ? (
+                <Button variant="outlined" type="button" onClick={resetForm}>
+                  Cancel Edit
+                </Button>
+              ) : null}
+            </Stack>
+          </Box>
+        </Box>
+      </Paper>
 
-          <div className="sm:col-span-2 flex gap-3">
-            <button className="btn-primary" type="submit">
-              {editing ? "Update Batch" : "Create Batch"}
-            </button>
-            {editing ? (
-              <button className="btn-secondary" type="button" onClick={resetForm}>
-                Cancel Edit
-              </button>
-            ) : null}
-          </div>
-        </form>
-      </section>
-
-      <section className="card space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl text-charcoal">Batches</h2>
-          <input
-            className="w-full sm:w-72"
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+          <Typography variant="h5">Batches</Typography>
+          <TextField
             placeholder="Search batches"
             value={search}
             onChange={(e) => {
               setPage(1);
               setSearch(e.target.value);
             }}
+            size="small"
+            sx={{ minWidth: { xs: "100%", sm: 280 } }}
           />
-        </div>
+        </Stack>
 
         {!batches.length ? (
           <EmptyState title="No batches found" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-charcoal/70">
-                <tr>
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Course</th>
-                  <th className="py-2">Schedule</th>
-                  <th className="py-2">Dates</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Course</TableCell>
+                  <TableCell>Schedule</TableCell>
+                  <TableCell>Dates</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {batches.map((batch) => (
-                  <tr key={batch.id} className="border-t border-sand/70">
-                    <td className="py-2 font-semibold">{batch.name}</td>
-                    <td className="py-2">{batch.course}</td>
-                    <td className="py-2">{batch.schedule}</td>
-                    <td className="py-2">
+                  <TableRow key={batch.id}>
+                    <TableCell sx={{ fontWeight: 700 }}>{batch.name}</TableCell>
+                    <TableCell>{batch.course}</TableCell>
+                    <TableCell>{batch.schedule}</TableCell>
+                    <TableCell>
                       {batch.start_date} - {batch.end_date || "ongoing"}
-                    </td>
-                    <td className="py-2">
-                      <div className="flex justify-end gap-2">
-                        <button className="btn-secondary px-3 py-1" onClick={() => startEdit(batch)} type="button">
+                    </TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Button variant="outlined" size="small" onClick={() => startEdit(batch)}>
                           Edit
-                        </button>
-                        <button
-                          className="btn-secondary px-3 py-1"
-                          onClick={() => void loadBatchStudents(batch)}
-                          type="button"
-                        >
+                        </Button>
+                        <Button variant="outlined" size="small" onClick={() => void loadBatchStudents(batch)}>
                           Students
-                        </button>
-                        <button
-                          className="rounded-lg bg-red-600 px-3 py-1 text-xs font-semibold text-white"
-                          onClick={() => setDeleteId(batch.id)}
-                          type="button"
-                        >
+                        </Button>
+                        <Button color="error" variant="contained" size="small" onClick={() => setDeleteId(batch.id)}>
                           Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
 
-        <div className="flex items-center justify-between text-sm">
-          <p>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+          <Typography variant="body2">
             Page {page} / {totalPages} ({total} batches)
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="btn-secondary"
-              type="button"
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              size="small"
               disabled={page <= 1}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             >
               Prev
-            </button>
-            <button
-              className="btn-secondary"
-              type="button"
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
               disabled={page >= totalPages}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
             >
               Next
-            </button>
-          </div>
-        </div>
-      </section>
+            </Button>
+          </Stack>
+        </Stack>
+      </Paper>
 
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h5">
           {selectedBatch ? `Students in ${selectedBatch.name}` : "Select a batch to view students"}
-        </h2>
+        </Typography>
         {!selectedBatch ? null : !batchStudents.length ? (
-          <div className="mt-3">
+          <Box sx={{ mt: 1.5 }}>
             <EmptyState title="No students assigned" />
-          </div>
+          </Box>
         ) : (
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+          <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.25 }}>
             {batchStudents.map((student) => (
-              <li key={student.id} className="rounded-lg border border-sand px-3 py-2 text-sm">
-                <p className="font-semibold">{student.full_name}</p>
-                <p className="text-xs text-charcoal/70">{student.phone || student.email || "-"}</p>
-              </li>
+              <Paper key={student.id} variant="outlined" sx={{ p: 1.25, borderColor: "#e8ddcc" }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  {student.full_name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {student.phone || student.email || "-"}
+                </Typography>
+              </Paper>
             ))}
-          </ul>
+          </Box>
         )}
-      </section>
+      </Paper>
 
       <ConfirmDialog
         open={Boolean(deleteId)}
@@ -316,7 +345,6 @@ export function BatchesPage() {
         onCancel={() => setDeleteId(null)}
         onConfirm={deleteBatch}
       />
-    </div>
+    </Stack>
   );
 }
-

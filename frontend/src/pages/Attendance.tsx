@@ -1,9 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { api } from "../api";
 import { EmptyState } from "../components/EmptyState";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import type { AttendanceRecord, AttendanceStats, Batch, BatchStudent } from "../types";
 import { useToast } from "../context/ToastContext";
+import type { AttendanceRecord, AttendanceStats, Batch, BatchStudent } from "../types";
 
 export function AttendancePage() {
   const { pushToast } = useToast();
@@ -48,9 +66,7 @@ export function AttendancePage() {
   };
 
   const loadHistory = async () => {
-    if (!selectedBatchId) {
-      return;
-    }
+    if (!selectedBatchId) return;
     try {
       const [historyData, statsData] = await Promise.all([
         api.attendanceHistory(
@@ -72,17 +88,13 @@ export function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedBatchId) {
-      return;
-    }
+    if (!selectedBatchId) return;
     void loadBatchStudents(selectedBatchId);
     void loadHistory();
   }, [selectedBatchId]);
 
   const submitAttendance = async () => {
-    if (!selectedBatchId || !students.length) {
-      return;
-    }
+    if (!selectedBatchId || !students.length) return;
     try {
       await api.markAttendance({
         batch_id: selectedBatchId,
@@ -100,9 +112,7 @@ export function AttendancePage() {
   };
 
   const exportCsv = async () => {
-    if (!selectedBatchId) {
-      return;
-    }
+    if (!selectedBatchId) return;
     try {
       const text = await api.attendanceExport(
         `?batch_id=${selectedBatchId}${historyFrom ? `&date_from=${historyFrom}` : ""}${
@@ -122,116 +132,154 @@ export function AttendancePage() {
   };
 
   const overallPercent = useMemo(() => {
-    if (!stats.length) {
-      return 0;
-    }
+    if (!stats.length) return 0;
     const total = stats.reduce((acc, item) => acc + item.total_classes, 0);
     const present = stats.reduce((acc, item) => acc + item.present_count, 0);
     return total ? Math.round((present / total) * 10000) / 100 : 0;
   }, [stats]);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="font-display text-xl text-charcoal">Mark Attendance</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <select
-            value={selectedBatchId || ""}
-            onChange={(e) => setSelectedBatchId(Number(e.target.value))}
-          >
-            <option value="">Select batch</option>
-            {batches.map((batch) => (
-              <option key={batch.id} value={batch.id}>
-                {batch.name}
-              </option>
-            ))}
-          </select>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <button className="btn-primary" onClick={submitAttendance} type="button">
+    <Stack spacing={3}>
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Typography variant="h5">Mark Attendance</Typography>
+        <Box sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel>Batch</InputLabel>
+            <Select
+              label="Batch"
+              value={selectedBatchId || ""}
+              onChange={(e) => setSelectedBatchId(Number(e.target.value))}
+            >
+              <MenuItem value="">Select batch</MenuItem>
+              {batches.map((batch) => (
+                <MenuItem key={batch.id} value={batch.id}>
+                  {batch.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+          />
+          <Button variant="contained" onClick={submitAttendance} type="button">
             Save Attendance
-          </button>
-        </div>
+          </Button>
+        </Box>
 
-        <div className="mt-4 space-y-2">
+        <Stack spacing={1.25} sx={{ mt: 2 }}>
           {!students.length ? (
             <EmptyState title="No students in this batch" />
           ) : (
             students.map((student) => (
-              <div
+              <Paper
                 key={student.id}
-                className="grid items-center gap-2 rounded-lg border border-sand px-3 py-2 sm:grid-cols-[1fr_120px]"
+                variant="outlined"
+                sx={{
+                  p: 1.25,
+                  borderColor: "#e8ddcc",
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 140px" },
+                  gap: 1,
+                  alignItems: "center",
+                }}
               >
-                <div>
-                  <p className="text-sm font-semibold">{student.full_name}</p>
-                  <p className="text-xs text-charcoal/70">{student.phone || student.email || "-"}</p>
-                </div>
-                <select
-                  value={statusMap[student.id] || "PRESENT"}
-                  onChange={(e) =>
-                    setStatusMap((prev) => ({
-                      ...prev,
-                      [student.id]: e.target.value as "PRESENT" | "ABSENT",
-                    }))
-                  }
-                >
-                  <option value="PRESENT">PRESENT</option>
-                  <option value="ABSENT">ABSENT</option>
-                </select>
-              </div>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {student.full_name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {student.phone || student.email || "-"}
+                  </Typography>
+                </Box>
+                <FormControl size="small" fullWidth>
+                  <Select
+                    value={statusMap[student.id] || "PRESENT"}
+                    onChange={(e) =>
+                      setStatusMap((prev) => ({
+                        ...prev,
+                        [student.id]: e.target.value as "PRESENT" | "ABSENT",
+                      }))
+                    }
+                  >
+                    <MenuItem value="PRESENT">PRESENT</MenuItem>
+                    <MenuItem value="ABSENT">ABSENT</MenuItem>
+                  </Select>
+                </FormControl>
+              </Paper>
             ))
           )}
-        </div>
-      </section>
+        </Stack>
+      </Paper>
 
-      <section className="card space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl text-charcoal">Attendance History</h2>
-          <div className="flex flex-wrap gap-2">
-            <input type="date" value={historyFrom} onChange={(e) => setHistoryFrom(e.target.value)} />
-            <input type="date" value={historyTo} onChange={(e) => setHistoryTo(e.target.value)} />
-            <button className="btn-secondary" onClick={() => void loadHistory()} type="button">
+      <Paper variant="outlined" sx={{ p: 2.5, borderColor: "#e8ddcc" }}>
+        <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={1.5}>
+          <Typography variant="h5">Attendance History</Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+            <TextField
+              size="small"
+              type="date"
+              label="From"
+              value={historyFrom}
+              onChange={(e) => setHistoryFrom(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              size="small"
+              type="date"
+              label="To"
+              value={historyTo}
+              onChange={(e) => setHistoryTo(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+            <Button variant="outlined" onClick={() => void loadHistory()} type="button">
               Filter
-            </button>
-            <button className="btn-secondary" onClick={exportCsv} type="button">
+            </Button>
+            <Button variant="outlined" onClick={exportCsv} type="button">
               Export CSV
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Stack>
+        </Stack>
 
-        <p className="text-sm text-charcoal/80">Batch attendance percentage: {overallPercent}%</p>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+          Batch attendance percentage: {overallPercent}%
+        </Typography>
 
         {!history.length ? (
-          <EmptyState title="No attendance records" />
+          <Box sx={{ mt: 1.5 }}>
+            <EmptyState title="No attendance records" />
+          </Box>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-charcoal/70">
-                <tr>
-                  <th className="py-2">Date</th>
-                  <th className="py-2">Student ID</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Marked By</th>
-                </tr>
-              </thead>
-              <tbody>
+          <TableContainer sx={{ mt: 1.5 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Student ID</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Marked By</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {history.map((item) => (
-                  <tr key={item.id} className="border-t border-sand/70">
-                    <td className="py-2">{item.date}</td>
-                    <td className="py-2">{item.student_id}</td>
-                    <td className="py-2">{item.status}</td>
-                    <td className="py-2">{item.marked_by}</td>
-                  </tr>
+                  <TableRow key={item.id}>
+                    <TableCell>{item.date}</TableCell>
+                    <TableCell>{item.student_id}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                    <TableCell>{item.marked_by}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      </section>
-    </div>
+      </Paper>
+    </Stack>
   );
 }
-

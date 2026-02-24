@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -26,43 +27,80 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-mist via-cream to-sand px-4">
-      <div className="w-full max-w-md rounded-2xl border border-sand bg-white p-6 shadow-card sm:p-8">
-        <h1 className="font-display text-2xl text-charcoal">Welcome Back</h1>
-        <p className="mt-1 text-sm text-charcoal/70">Login to manage your coaching institute operations.</p>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        px: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          maxWidth: 460,
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: -12,
+            borderRadius: 4,
+            bgcolor: "background.paper",
+            opacity: 0.25,
+            border: "1px solid",
+            borderColor: "divider",
+            backdropFilter: "blur(8px)",
+            zIndex: 0,
+          },
+        }}
+      >
+      <Paper sx={{ width: "100%", p: { xs: 3, sm: 4 }, position: "relative", zIndex: 1 }}>
+        <Typography variant="h4">Welcome Back</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+          Login to manage your coaching institute operations.
+        </Typography>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-charcoal/70">
-              Email
-            </label>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-charcoal/70">
-              Password
-            </label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              required
-              minLength={6}
-            />
-          </div>
-          <button type="submit" className="btn-primary w-full" disabled={submitting}>
+        <Stack component="form" onSubmit={onSubmit} spacing={2} sx={{ mt: 3 }}>
+          <TextField
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            required
+            fullWidth
+          />
+          <TextField
+            label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            required
+            inputProps={{ minLength: 6 }}
+            fullWidth
+          />
+          <Button type="submit" variant="contained" disabled={submitting} fullWidth>
             {submitting ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
+          </Button>
+        </Stack>
 
-        <div className="mt-5 rounded-lg border border-sand bg-mist px-3 py-2 text-xs text-charcoal/80">
-          Demo credentials:
-          <p>`admin@demo.com / Admin@123`</p>
-          <p>`teacher@demo.com / Teacher@123`</p>
-          <p>`student1@demo.com / Student@123`</p>
-        </div>
-      </div>
-    </div>
+        <Paper sx={{ mt: 2.5, p: 1.5 }}>
+          <Typography variant="caption" sx={{ display: "block", fontWeight: 700 }}>
+            Demo credentials
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block" }}>
+            admin@demo.com / Admin@123
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block" }}>
+            teacher@demo.com / Teacher@123
+          </Typography>
+          <Typography variant="caption" sx={{ display: "block" }}>
+            student1@demo.com / Student@123
+          </Typography>
+        </Paper>
+      </Paper>
+      </Box>
+    </Box>
   );
 }
 

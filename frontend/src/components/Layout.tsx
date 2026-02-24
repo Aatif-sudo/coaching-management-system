@@ -1,5 +1,19 @@
-import { NavLink, Outlet } from "react-router-dom";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import LogoutIcon from "@mui/icons-material/Logout";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Toolbar,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useThemeMode } from "../context/ThemeModeContext";
 
 interface NavItem {
   label: string;
@@ -19,56 +33,98 @@ const studentNav: NavItem[] = [{ label: "Dashboard", to: "/student" }];
 
 export function Layout() {
   const { user, logout } = useAuth();
+  const { mode, toggleMode } = useThemeMode();
   const navItems = user?.role === "STUDENT" ? studentNav : staffNav;
+  const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream via-mist to-cream">
-      <header className="sticky top-0 z-30 border-b border-sand bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div>
-            <h1 className="font-display text-xl text-charcoal sm:text-2xl">Coaching Management System</h1>
-            <p className="text-xs text-charcoal/70">Operations console for coaching institutes</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg border border-sand bg-mist px-3 py-2 text-xs text-charcoal">
-              <p className="font-semibold">{user?.full_name}</p>
-              <p>{user?.role}</p>
-            </div>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-lg bg-charcoal px-3 py-2 text-xs font-semibold text-white"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[220px_1fr]">
-        <aside className="rounded-2xl border border-sand bg-white p-3 shadow-card">
-          <nav className="grid gap-1">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `rounded-lg px-3 py-2 text-sm font-semibold ${
-                    isActive ? "bg-bronze text-white" : "text-charcoal hover:bg-mist"
-                  }`
-                }
+    <Box sx={{ minHeight: "100vh" }}>
+      <AppBar position="sticky" color="default" elevation={1}>
+        <Container maxWidth="xl">
+          <Toolbar sx={{ px: "0 !important", py: 1, minHeight: "auto" }}>
+            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2} sx={{ width: "100%" }}>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                Coaching Management System
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Operations console for coaching institutes
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Paper variant="outlined" sx={{ px: 1.5, py: 1 }}>
+                <Typography variant="caption" sx={{ display: "block", fontWeight: 700 }}>
+                  {user?.full_name}
+                </Typography>
+                <Typography variant="caption">{user?.role}</Typography>
+              </Paper>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={toggleMode}
+                startIcon={mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
               >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-        </aside>
+                {mode === "dark" ? "Light" : "Dark"}
+              </Button>
+              <Button variant="contained" size="small" onClick={logout} endIcon={<LogoutIcon />}>
+                Logout
+              </Button>
+            </Stack>
+          </Stack>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-        <main className="rounded-2xl border border-sand bg-white p-4 shadow-card sm:p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        <Box
+          sx={{
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              inset: { xs: "-10px", md: "-20px" },
+              borderRadius: 4,
+              background:
+                mode === "dark"
+                  ? "linear-gradient(135deg, rgba(56,189,248,0.14), rgba(15,23,42,0.1) 40%, rgba(6,182,212,0.08) 100%)"
+                  : "linear-gradient(135deg, rgba(255,255,255,0.58), rgba(226,242,255,0.3) 50%, rgba(241,245,249,0.18) 100%)",
+              border: "1px solid",
+              borderColor: mode === "dark" ? "rgba(147,180,217,0.25)" : "rgba(15,23,42,0.08)",
+              backdropFilter: "blur(10px)",
+              zIndex: 0,
+              pointerEvents: "none",
+            },
+          }}
+        >
+        <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "220px 1fr" } }}>
+          <Paper sx={{ p: 1.5, position: "relative", zIndex: 1 }}>
+            <Stack spacing={0.5}>
+              {navItems.map((item) => (
+                <Button
+                  key={item.to}
+                  component={RouterLink}
+                  to={item.to}
+                  variant={location.pathname === item.to ? "contained" : "text"}
+                  fullWidth
+                  sx={{
+                    justifyContent: "flex-start",
+                    textTransform: "none",
+                    fontWeight: 700,
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Stack>
+          </Paper>
+
+          <Paper sx={{ p: { xs: 2, sm: 3 }, position: "relative", zIndex: 1 }}>
+            <Outlet />
+          </Paper>
+        </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 
