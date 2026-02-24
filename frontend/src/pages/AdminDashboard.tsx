@@ -52,6 +52,9 @@ export function AdminDashboardPage() {
       setRules(ruleData);
       setBatches(batchData.items);
     } catch {
+      setDashboard(null);
+      setRules([]);
+      setBatches([]);
       pushToast("error", "Failed to load dashboard data");
     } finally {
       setLoading(false);
